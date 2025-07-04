@@ -7,34 +7,22 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogTitle, AlertDialogDescription } from '@/components/ui/alert-dialog'
 
-interface Review {
-  id: string
-  user: string
-  rating: number
-  content: string
-  date: string
-  images?: string[]
+interface ReviewSectionProps {
+  productId: string
+  reviews: Array<{
+    id: string
+    rating: number
+    title: string | null
+    content: string | null
+    images: string[]
+    createdAt: Date
+    user: {
+      name: string | null
+    }
+  }>
 }
 
-const initialReviews: Review[] = [
-  {
-    id: '1',
-    user: 'John Doe',
-    rating: 5,
-    content: '엄청 좋아요! 강력 추천합니다.',
-    date: '2025-07-04',
-    images: ['/placeholder-product.svg']
-  },
-  {
-    id: '2',
-    user: 'Jane Doe',
-    rating: 4,
-    content: '괜찮은 제품이에요.',
-    date: '2025-07-02'
-  }
-]
-
-export function ReviewSection() {
+export function ReviewSection({ productId, reviews: initialReviews }: ReviewSectionProps) {
   const [reviews, setReviews] = useState(initialReviews)
   const [newReview, setNewReview] = useState({ user: '', rating: 0, content: '', images: [] as string[] })
   const [showDialog, setShowDialog] = useState(false)
@@ -55,21 +43,24 @@ export function ReviewSection() {
           <Card key={review.id}>
             <CardContent className="flex gap-4 p-6">
               <Avatar className="w-12 h-12">
-                <AvatarImage src="/placeholder-avatar.jpg" alt={review.user} />
-                <AvatarFallback>{review.user.charAt(0)}</AvatarFallback>
+                <AvatarImage src="/placeholder-avatar.jpg" alt={review.user.name || '익명'} />
+                <AvatarFallback>{review.user.name?.charAt(0) || '익'}</AvatarFallback>
               </Avatar>
               <div>
                 <div className="flex items-center gap-2">
-                  <h4 className="font-medium">{review.user}</h4>
-                  <span className="text-sm text-gray-600">{review.date}</span>
+                  <h4 className="font-medium">{review.user.name || '익명'}</h4>
+                  <span className="text-sm text-gray-600">{new Date(review.createdAt).toLocaleDateString('ko-KR')}</span>
                 </div>
                 <div className="flex items-center mt-1">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className={`h-4 w-4 ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'}`} />
+                    <Star key={i} className={`h-4 w-4 ${i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
                   ))}
                 </div>
+                {review.title && (
+                  <h5 className="font-medium mt-2">{review.title}</h5>
+                )}
                 <p className="mt-2">{review.content}</p>
-                {review.images && (
+                {review.images && review.images.length > 0 && (
                   <div className="mt-4 flex gap-2">
                     {review.images.map((image, index) => (
                       <img key={index} src={image} alt={`Review image ${index + 1}`} className="w-20 h-20 object-cover rounded" />

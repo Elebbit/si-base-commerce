@@ -4,57 +4,47 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ProductCard } from '@/components/product/product-card'
 import { ArrowRight, Truck, CreditCard, HeadphonesIcon } from 'lucide-react'
+import { prisma } from '@/lib/prisma'
 
-// 임시 데이터 - 나중에 DB에서 가져올 예정
-const featuredProducts = [
-  {
-    id: '1001234567890',
-    name: 'iPhone 15 Pro Max',
-    slug: 'iphone-15-pro-max',
-    price: 1590000,
-    salePrice: 1490000,
-    images: ['/placeholder-product.svg'],
-    status: 'ACTIVE',
-    stock: 10
-  },
-  {
-    id: '1001234567891',
-    name: 'MacBook Pro 14인치',
-    slug: 'macbook-pro-14',
-    price: 2690000,
-    images: ['/placeholder-product.svg'],
-    status: 'ACTIVE',
-    stock: 5
-  },
-  {
-    id: '1001234567892',
-    name: 'AirPods Pro 2세대',
-    slug: 'airpods-pro-2',
-    price: 359000,
-    salePrice: 299000,
-    images: ['/placeholder-product.svg'],
-    status: 'ACTIVE',
-    stock: 0
-  },
-  {
-    id: '1001234567893',
-    name: 'iPad Air 5세대',
-    slug: 'ipad-air-5',
-    price: 929000,
-    images: ['/placeholder-product.svg'],
-    status: 'ACTIVE',
-    stock: 15
-  }
-]
+// 데이터베이스에서 데이터 가져오기
+async function getFeaturedProducts() {
+  return await prisma.product.findMany({
+    where: {
+      status: 'ACTIVE',
+    },
+    take: 4,
+    orderBy: {
+      createdAt: 'desc'
+    }
+  })
+}
 
-const categories = [
-  { name: '전자제품', slug: 'electronics', count: 156 },
-  { name: '패션', slug: 'fashion', count: 234 },
-  { name: '홈 & 리빙', slug: 'home', count: 89 },
-  { name: '도서', slug: 'books', count: 567 }
-]
+async function getCategories() {
+  const categories = await prisma.category.findMany({
+    where: {
+      isActive: true
+    },
+    include: {
+      _count: {
+        select: {
+          products: true
+        }
+      }
+    }
+  })
+  
+  return categories.map(category => ({
+    name: category.name,
+    slug: category.slug,
+    count: category._count.products
+  }))
+}
 
-export default function Home() {
+export default async function Home() {
+  const [featuredProducts, categories] = await Promise.all([
+    getFeaturedProducts(),
+    getCategories()
+  ])
   return (
     <div className="min-h-screen">
       {/* 히어로 섹션 */}

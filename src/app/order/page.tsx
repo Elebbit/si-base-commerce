@@ -1,13 +1,48 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
+import { useCart } from '@/contexts/cart-context'
 
-export default function OrderPage() {
+interface OrderItem {
+  id?: string;
+  productId: string;
+  name: string;
+  quantity: number;
+  price: number;
+  image: string;
+}
+
+function OrderPageContent() {
+  const { items: cartItems, clearCart } = useCart()
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const [orderItems, setOrderItems] = useState<OrderItem[]>([])
+  const [isBuyNow, setIsBuyNow] = useState(false)
+
+  useEffect(() => {
+    const itemsQuery = searchParams.get('items')
+    if (itemsQuery) {
+      try {
+        const parsedItems = JSON.parse(itemsQuery)
+        setOrderItems(parsedItems)
+        setIsBuyNow(true)
+      } catch (error) {
+        console.error("URL의 주문 상품 정보 파싱 실패:", error)
+        setOrderItems(cartItems)
+        setIsBuyNow(false)
+      }
+    } else {
+      setOrderItems(cartItems)
+      setIsBuyNow(false)
+    }
+  }, [searchParams, cartItems])
+
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -19,18 +54,7 @@ export default function OrderPage() {
     deliveryMessage: ''
   })
 
-  // 임시 주문 상품 데이터 (실제로는 장바구니에서 가져올 예정)
-  const orderItems = [
-    {
-      id: '1001234567890',
-      name: 'iPhone 15 Pro Max',
-      price: 1490000,
-      quantity: 1,
-      image: '/placeholder-product.svg'
-    }
-  ]
-
-  const subtotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+  const subtotal = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const shipping = subtotal >= 50000 ? 0 : 3000
   const total = subtotal + shipping
 
@@ -41,10 +65,41 @@ export default function OrderPage() {
     }).format(price)
   }
 
+  const handlePostcodeSearch = () => {
+    // Daum 우편번호 서비스 사용
+    if (typeof window !== 'undefined' && (window as any).daum) {
+      new (window as any).daum.Postcode({
+        oncomplete: function(data: any) {
+          setFormData(prev => ({
+            ...prev,
+            zipCode: data.zonecode,
+            address: data.address
+          }))
+        }
+      }).open()
+    } else {
+      alert('우편번호 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.')
+    }
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    if (orderItems.length === 0) {
+      alert('주문할 상품이 없습니다.')
+      return
+    }
+    // TODO: 실제 주문 처리 로직과 결제 API 연동
+    console.log('주문 데이터:', {
+      ...formData,
+      items: orderItems,
+      total,
+    })
     alert('주문이 완료되었습니다!')
-    // 실제로는 주문 처리 로직과 결제 API 연동
+    
+    if (!isBuyNow) {
+      clearCart()
+    }
+    router.push('/') // 주문 완료 후 홈으로 이동
   }
 
   return (
@@ -108,7 +163,7 @@ export default function OrderPage() {
                       onChange={(e) => setFormData({...formData, zipCode: e.target.value})}
                       placeholder="12345"
                     />
-                    <Button type="button" variant="outline">우편번호 찾기</Button>
+                    <Button type="button" variant="outline" onClick={handlePostcodeSearch}>우편번호 찾기</Button>
                   </div>
                 </div>
                 <div>
@@ -190,8 +245,8 @@ export default function OrderPage() {
               <CardTitle>주문 상품</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {orderItems.map((item) => (
-                <div key={item.id} className="flex gap-3">
+              {orderItems.length > 0 ? orderItems.map((item) => (
+                <div key={item.id || item.productId} className="flex gap-3">
                   <img
                     src={item.image}
                     alt={item.name}
@@ -201,11 +256,15 @@ export default function OrderPage() {
                     <h4 className="font-medium text-sm">{item.name}</h4>
                     <div className="flex justify-between items-center mt-1">
                       <span className="text-sm text-gray-600">수량: {item.quantity}</span>
-                      <span className="font-semibold">{formatPrice(item.price)}</span>
+                      <span className="font-semibold">{formatPrice(item.price * item.quantity)}</span>
                     </div>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="text-center text-gray-500 py-4">
+                  주문할 상품이 없습니다.
+                </div>
+              )}
 
               <Separator />
 
@@ -252,5 +311,13 @@ export default function OrderPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function OrderPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-8 text-center">주문 정보를 불러오는 중입니다...</div>}>
+      <OrderPageContent />
+    </Suspense>
   )
 }

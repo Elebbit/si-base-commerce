@@ -5,13 +5,14 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 
+
 interface ProductCardProps {
   product: {
     id: string
     name: string
     slug: string
     price: number
-    salePrice?: number
+    salePrice?: number | null
     images: string[]
     status: string
     stock: number
@@ -19,9 +20,11 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const hasDiscount = product.salePrice && product.salePrice < product.price
+  const priceNum = product.price
+  const salePriceNum = product.salePrice
+  const hasDiscount = salePriceNum && salePriceNum < priceNum
   const discountPercentage = hasDiscount 
-    ? Math.round(((product.price - product.salePrice!) / product.price) * 100)
+    ? Math.round(((priceNum - salePriceNum!) / priceNum) * 100)
     : 0
 
   const formatPrice = (price: number) => {
@@ -34,7 +37,7 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <Card className="group overflow-hidden hover:shadow-lg transition-shadow">
       <div className="relative">
-        <Link href={`/products/${product.id}`}>
+        <Link href={`/products/${product.slug}`}>
           <div className="aspect-square overflow-hidden">
             <Image
               src={product.images[0] || '/placeholder-product.svg'}
@@ -66,7 +69,7 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
 
       <CardContent className="p-4">
-        <Link href={`/products/${product.id}`}>
+        <Link href={`/products/${product.slug}`}>
           <h3 className="font-medium text-sm mb-2 line-clamp-2 hover:text-primary">
             {product.name}
           </h3>
@@ -77,15 +80,15 @@ export function ProductCard({ product }: ProductCardProps) {
             {hasDiscount ? (
               <>
                 <span className="text-lg font-bold text-red-500">
-                  {formatPrice(product.salePrice!)}
+                  {formatPrice(salePriceNum!)}
                 </span>
                 <span className="text-sm text-gray-500 line-through">
-                  {formatPrice(product.price)}
+                  {formatPrice(priceNum)}
                 </span>
               </>
             ) : (
               <span className="text-lg font-bold">
-                {formatPrice(product.price)}
+                {formatPrice(priceNum)}
               </span>
             )}
           </div>
