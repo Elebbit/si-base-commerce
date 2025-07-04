@@ -8,43 +8,48 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
+import { ReviewSection } from '@/components/review/review-section'
 
 // 임시 데이터 - 나중에 실제 데이터베이스에서 가져올 예정
-const getProductBySlug = (slug: string) => {
+const getProductById = (id: string) => {
   // 실제로는 Prisma를 사용해서 데이터베이스에서 가져올 예정
-  return {
-    id: '1',
-    name: 'iPhone 15 Pro Max',
-    description: 'Apple의 최신 플래그십 스마트폰으로, 강력한 A17 Pro 칩셋과 Pro 카메라 시스템을 탑재했습니다.',
-    price: 1590000,
-    salePrice: 1490000,
-    images: [
-      '/placeholder-product.svg',
-      '/placeholder-product.svg',
-      '/placeholder-product.svg',
-    ],
-    status: 'ACTIVE',
-    stock: 10,
-    category: '전자제품',
-    sku: 'IPHONE15PROMAX',
-    rating: 4.5,
-    reviewCount: 1234,
-    specifications: {
-      '화면 크기': '6.7인치',
-      '운영체제': 'iOS 17',
-      '저장용량': '256GB',
-      '색상': '내추럴 티타늄',
-      '배터리': '리튬이온',
-      '무게': '221g'
+  const products = {
+    '1001234567890': {
+      id: '1001234567890',
+      name: 'iPhone 15 Pro Max',
+      description: 'Apple의 최신 플래그십 스마트폰으로, 강력한 A17 Pro 칩셈과 Pro 카메라 시스템을 탑재했습니다.',
+      price: 1590000,
+      salePrice: 1490000,
+      images: [
+        '/placeholder-product.svg',
+        '/placeholder-product.svg',
+        '/placeholder-product.svg',
+      ],
+      status: 'ACTIVE',
+      stock: 10,
+      category: '전자제품',
+      sku: 'IPHONE15PROMAX',
+      rating: 4.5,
+      reviewCount: 1234,
+      specifications: {
+        '화면 크기': '6.7인치',
+        '운영체제': 'iOS 17',
+        '저장용량': '256GB',
+        '색상': '내추럴 티타늄',
+        '배터리': '리틬이온',
+        '무게': '221g'
+      }
     }
   }
+  
+  return products[id as keyof typeof products] || null
 }
 
 export default function ProductPage({ params }: { params: { slug: string } }) {
   const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
   
-  const product = getProductBySlug(params.slug)
+  const product = getProductById(params.slug) // slug를 id로 사용
   
   if (!product) {
     return <div>상품을 찾을 수 없습니다.</div>
@@ -72,6 +77,16 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
     if (quantity > 1) {
       setQuantity(quantity - 1)
     }
+  }
+
+  const addToCart = () => {
+    // 장바구니에 추가하는 로직 (나중에 전역 상태 사용)
+    alert(`${product.name} ${quantity}개가 장바구니에 추가되었습니다!`)
+  }
+
+  const buyNow = () => {
+    // 바로 구매 로직 (나중에 주문 페이지로 이동)
+    alert(`${product.name} ${quantity}개를 바로 구매합니다!`)
   }
 
   return (
@@ -189,7 +204,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 
             {/* 구매 버튼들 */}
             <div className="flex gap-3">
-              <Button size="lg" className="flex-1" disabled={product.stock === 0}>
+              <Button size="lg" className="flex-1" disabled={product.stock === 0} onClick={addToCart}>
                 <ShoppingCart className="mr-2 h-4 w-4" />
                 장바구니 담기
               </Button>
@@ -201,7 +216,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
               </Button>
             </div>
 
-            <Button size="lg" variant="secondary" className="w-full">
+            <Button size="lg" variant="secondary" className="w-full" onClick={buyNow}>
               바로 구매하기
             </Button>
           </div>
@@ -263,8 +278,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
           <TabsContent value="reviews" className="mt-6">
             <Card>
               <CardContent className="p-6">
-                <h3 className="text-xl font-semibold mb-4">고객 리뷰</h3>
-                <p className="text-gray-600">리뷰 기능은 준비 중입니다.</p>
+                <ReviewSection />
               </CardContent>
             </Card>
           </TabsContent>

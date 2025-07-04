@@ -8,7 +8,7 @@ import { ArrowRight, Truck, CreditCard, HeadphonesIcon } from 'lucide-react'
 // 임시 데이터 - 나중에 DB에서 가져올 예정
 const featuredProducts = [
   {
-    id: '1',
+    id: '1001234567890',
     name: 'iPhone 15 Pro Max',
     slug: 'iphone-15-pro-max',
     price: 1590000,
@@ -18,7 +18,7 @@ const featuredProducts = [
     stock: 10
   },
   {
-    id: '2',
+    id: '1001234567891',
     name: 'MacBook Pro 14인치',
     slug: 'macbook-pro-14',
     price: 2690000,
@@ -27,7 +27,7 @@ const featuredProducts = [
     stock: 5
   },
   {
-    id: '3',
+    id: '1001234567892',
     name: 'AirPods Pro 2세대',
     slug: 'airpods-pro-2',
     price: 359000,
@@ -37,7 +37,7 @@ const featuredProducts = [
     stock: 0
   },
   {
-    id: '4',
+    id: '1001234567893',
     name: 'iPad Air 5세대',
     slug: 'ipad-air-5',
     price: 929000,
@@ -71,7 +71,7 @@ export default function Home() {
               지금 쇼핑하기
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-blue-600">
+            <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-blue-600 bg-transparent">
               카테고리 보기
             </Button>
           </div>

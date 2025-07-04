@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -34,6 +35,7 @@ const initialCartItems = [
 ]
 
 export default function CartPage() {
+  const router = useRouter()
   const [cartItems, setCartItems] = useState(initialCartItems)
 
   const formatPrice = (price: number) => {
@@ -224,7 +226,7 @@ export default function CartPage() {
               </div>
 
               <div className="space-y-2">
-                <Button size="lg" className="w-full">
+                <Button size="lg" className="w-full" onClick={() => router.push('/order')}>
                   주문하기
                 </Button>
                 <Link href="/">

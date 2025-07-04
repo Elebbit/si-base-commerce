@@ -21,7 +21,7 @@ import {
 export function Header() {
   // TODO: 실제 장바구니 아이템 수와 사용자 정보를 가져와야 함
   const cartItemCount = 0
-  const user = null
+  const user = { role: 'ADMIN' } // 임시로 ADMIN 역할 설정
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -58,28 +58,28 @@ export function Header() {
         </div>
 
         {/* 네비게이션 메뉴 (데스크톱) */}
-        <nav className="hidden md:flex items-center space-x-6">
-          <Link href="/categories/electronics" className="text-sm font-medium hover:text-primary">
+        <nav className="hidden md:flex items-center justify-center flex-1 space-x-8">
+          <Link href="/categories/electronics" className="text-sm font-medium hover:text-primary transition-colors">
             전자제품
           </Link>
-          <Link href="/categories/fashion" className="text-sm font-medium hover:text-primary">
+          <Link href="/categories/fashion" className="text-sm font-medium hover:text-primary transition-colors">
             패션
           </Link>
-          <Link href="/categories/home" className="text-sm font-medium hover:text-primary">
+          <Link href="/categories/home" className="text-sm font-medium hover:text-primary transition-colors">
             홈 & 리빙
           </Link>
-          <Link href="/categories/books" className="text-sm font-medium hover:text-primary">
+          <Link href="/categories/books" className="text-sm font-medium hover:text-primary transition-colors">
             도서
           </Link>
         </nav>
 
         {/* 검색 */}
-        <div className="flex-1 max-w-md mx-4">
+        <div className="max-w-md mx-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
               placeholder="상품을 검색하세요..."
-              className="pl-10"
+              className="pl-10 w-80"
             />
           </div>
         </div>
@@ -114,6 +114,14 @@ export function Header() {
                   <DropdownMenuItem>
                     <Link href="/orders">주문 내역</Link>
                   </DropdownMenuItem>
+                  {user.role === 'ADMIN' && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem>
+                        <Link href="/admin">관리자 페이지</Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>로그아웃</DropdownMenuItem>
                 </>
